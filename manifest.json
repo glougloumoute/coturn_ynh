@@ -11,7 +11,7 @@
     "license": "free",
     "maintainer": {
         "name": "glougloumoute",
-        "email": "glougloumoute@users.noreply.github.com",
+        "email": "glougloumoute@users.noreply.github.com"
     },
     "requirements": {
         "yunohost": ">= 4.1.3"
