@@ -33,6 +33,9 @@ turn_secret=${YNH_APP_ARG_TURN_SECRET:-$(ynh_string_random --length=10)}
 
 app=$YNH_APP_INSTANCE_NAME
 
+# A password to manage turn service from the command line
+export cli_password=$(ynh_string_random --length=10)
+
 #=================================================
 # STORE SETTINGS FROM MANIFEST
 #=================================================
@@ -56,6 +59,17 @@ port_turns=$(ynh_find_port --port=5349)
 ynh_app_setting_set --app=$app --key=port_stun --value=$port_stun
 ynh_app_setting_set --app=$app --key=port_turn --value=$port_turns
 
+# XXX workaround
+# Currently, checking/reserving port ranges is buggy in yunohost
+# So instead of configuring a range of plenty of UDP ports, we configure a range of 2 UDP ports for turnserver
+#ynh_exec_warn_less yunohost firewall allow UDP -4 49152:65535
+port_udp_min=$(ynh_find_port --port=49152)
+port_udp_max=$(ynh_find_port --port=49153) # XXX dirty workaround because currently, checking for port range is buggy in yunohost
+ynh_app_setting_set --app=$app --key=port_udp_min --value=$port_udp_min
+ynh_app_setting_set --app=$app --key=port_udp_max --value=$port_udp_max
+ynh_exec_warn_less yunohost firewall allow UDP -4 $port_udp_min
+ynh_exec_warn_less yunohost firewall allow UDP -4 $port_udp_max
+
 # Open the port
 ynh_script_progression --message="Configuring firewall..." --time --weight=1
 ynh_exec_warn_less yunohost firewall allow --no-upnp Both $port_stun
@@ -71,13 +85,18 @@ ynh_install_app_dependencies $pkg_dependencies
 # SPECIFIC SETUP
 #=================================================
 
+export port_stun
+export port_turns
+export port_udp_min
+export port_udp_max
 ynh_add_config --template="metronome.cfg.lua" --destination="$metronome_partial_config_filename"
 
 #=================================================
 # MODIFY A CONFIG FILE
 #=================================================
 
-ynh_replace_string --target_file="$coturn_config_filename" --match_string="#static-auth-secret=" --replace_string="static-auth-secret=$turn_secret"
+test -f $coturn_config_filename && mv $coturn_config_filename ${coturn_config_filename}.bkp
+ynh_add_config --template="turnserver.conf" --destination="$coturn_config_filename"
 
 #=================================================
 # STORE THE CONFIG FILE CHECKSUM
@@ -96,7 +115,7 @@ ynh_store_file_checksum --file="$coturn_config_filename"
 #=================================================
 
 # Use logrotate to manage application logfile(s)
-ynh_use_logrotate
+#ynh_use_logrotate
 
 #=================================================
 # INTEGRATE SERVICE IN YUNOHOST

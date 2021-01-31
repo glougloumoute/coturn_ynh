@@ -45,20 +45,12 @@ ynh_script_progression --message="Removing dependencies..." --time --weight=1
 ynh_remove_app_dependencies
 
 #=================================================
-# REMOVE APP MAIN DIR
-#=================================================
-ynh_script_progression --message="Removing app main directory..." --time --weight=1
-
-# Remove the app directory securely
-ynh_secure_remove --file="$final_path"
-
-#=================================================
 # REMOVE LOGROTATE CONFIGURATION
 #=================================================
-ynh_script_progression --message="Removing logrotate configuration..." --time --weight=1
+#ynh_script_progression --message="Removing logrotate configuration..." --time --weight=1
 
 # Remove the app-specific logrotate config
-ynh_remove_logrotate
+#ynh_remove_logrotate
 
 #=================================================
 # CLOSE A PORT
@@ -73,6 +65,16 @@ if yunohost firewall list | grep -q "\- $port_turns$"
 then
 	ynh_script_progression --message="Closing port $port_turns..." --time --weight=1
 	ynh_exec_warn_less yunohost firewall disallow TCP $port_turns
+fi
+if yunohost firewall list | grep -q "\- $port_udp_min$"
+then
+	ynh_script_progression --message="Closing port $port_udp_min..." --time --weight=1
+	ynh_exec_warn_less yunohost firewall disallow UDP $port_udp_min
+fi
+if yunohost firewall list | grep -q "\- $port_udp_max$"
+then
+	ynh_script_progression --message="Closing port $port_udp_max..." --time --weight=1
+	ynh_exec_warn_less yunohost firewall disallow UDP $port_udp_max
 fi
 
 ##=================================================

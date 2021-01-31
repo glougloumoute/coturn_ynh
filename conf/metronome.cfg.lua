@@ -1,24 +1,24 @@
 external_services = {
     ["__DOMAIN__"] = {
         [1] = {
-            port = "3478",
+            port = "__PORT_STUN__",
             transport = "udp",
             type = "stun"
         },
 
         [2] = {
-            port = "3478",
+            port = "__PORT_STUN__",
             transport = "tcp",
             type = "stun"
         },
 
         [3] = {
-            port = "5349",
+            port = "__PORT_TURNS__",
             transport = "tcp",
             type = "stuns"
         },
         [4] = {
-            port = "3478",
+            port = "__PORT_STUN__",
             transport = "tcp",
             type = "turn",
             turn_secret = "__TURN_SECRET__",
@@ -26,7 +26,7 @@ external_services = {
         },
 
         [5] = {
-            port = "3478",
+            port = "__PORT_STUN__",
             transport = "udp",
             type = "turn",
             turn_secret = "__TURN_SECRET__",
@@ -34,7 +34,7 @@ external_services = {
         },
 
         [6] = {
-            port = "5349",
+            port = "__PORT_TURNS__",
             transport = "tcp",
             type = "turns",
             turn_secret = "__TURN_SECRET__",
