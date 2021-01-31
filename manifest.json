@@ -70,17 +70,18 @@
                 "default": "fr"
             },
             {
-                "name": "password",
+                "name": "turn_secret",
                 "type": "password",
+		"optional": true,
                 "ask": {
-                    "en": "Set the administrator password",
-                    "fr": "Définissez le mot de passe administrateur"
+                    "en": "Set the shared secret for using the TURN service",
+                    "fr": "Définissez le secret partagé pour l'usage du service TURN"
                 },
                 "help": {
-                    "en": "Use the help field to add an information for the admin about this question.",
-                    "fr": "Utilisez le champ aide pour ajouter une information à l'intention de l'administrateur à propos de cette question."
+                    "en": "This is the secret string to be used in configuration of other services allowed to make use of this TURN server.",
+                    "fr": "C'est un secret utiliser dans la configuration d'autres services qui seront autorisés à utiliser ce serveur TURN.."
                 },
-                "example": "Choose a password"
+                "example": "Xut_Wrourkif1"
             }
         ]
     }

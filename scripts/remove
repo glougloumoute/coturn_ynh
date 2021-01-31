@@ -75,13 +75,13 @@ then
 	ynh_exec_warn_less yunohost firewall disallow TCP $port_turns
 fi
 
-#=================================================
-# REMOVE FAIL2BAN CONFIGURATION
-#=================================================
-ynh_script_progression --message="Removing Fail2ban configuration..." --time --weight=1
-
-# Remove the dedicated Fail2Ban config
-ynh_remove_fail2ban_config
+##=================================================
+## REMOVE FAIL2BAN CONFIGURATION
+##=================================================
+#ynh_script_progression --message="Removing Fail2ban configuration..." --time --weight=1
+#
+## Remove the dedicated Fail2Ban config
+#ynh_remove_fail2ban_config
 
 #=================================================
 # SPECIFIC REMOVE
@@ -89,24 +89,11 @@ ynh_remove_fail2ban_config
 # REMOVE VARIOUS FILES
 #=================================================
 
-# Remove a cron file
-ynh_secure_remove --file="/etc/cron.d/$app"
-
-# Remove a directory securely
-ynh_secure_remove --file="/etc/$app/"
-
-# Remove the log files
-ynh_secure_remove --file="/var/log/$app/"
+ynh_secure_remove --file="$metronome_partial_config_filename"
 
 #=================================================
 # GENERIC FINALIZATION
 #=================================================
-# REMOVE DEDICATED USER
-#=================================================
-ynh_script_progression --message="Removing the dedicated system user..." --time --weight=1
-
-# Delete a system user
-ynh_system_user_delete --username=$app
 
 #=================================================
 # END OF SCRIPT

@@ -29,7 +29,7 @@ path_url=$YNH_APP_ARG_PATH
 admin=$YNH_APP_ARG_ADMIN
 is_public=$YNH_APP_ARG_IS_PUBLIC
 language=$YNH_APP_ARG_LANGUAGE
-password=$YNH_APP_ARG_PASSWORD
+turn_secret=${YNH_APP_ARG_TURN_SECRET:-$(ynh_string_random --length=10)}
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -70,17 +70,14 @@ ynh_install_app_dependencies $pkg_dependencies
 #=================================================
 # SPECIFIC SETUP
 #=================================================
-# ...
-#=================================================
+
+ynh_add_config --template="metronome.cfg.lua" --destination="$metronome_partial_config_filename"
 
 #=================================================
 # MODIFY A CONFIG FILE
 #=================================================
 
-### `ynh_replace_string` is used to replace a string in a file.
-### (It's compatible with sed regular expressions syntax)
-
-ynh_replace_string --match_string="match_string" --replace_string="replace_string" --target_file="$final_path/CONFIG_FILE"
+ynh_replace_string --target_file="$coturn_config_filename" --match_string="#static-auth-secret=" --replace_string="static-auth-secret=$turn_secret"
 
 #=================================================
 # STORE THE CONFIG FILE CHECKSUM
@@ -91,7 +88,8 @@ ynh_replace_string --match_string="match_string" --replace_string="replace_strin
 ### you can make a backup of this file before modifying it again if the admin had modified it.
 
 # Calculate and store the config file checksum into the app settings
-ynh_store_file_checksum --file="$final_path/CONFIG_FILE"
+ynh_store_file_checksum --file="$metronome_partial_config_filename"
+ynh_store_file_checksum --file="$coturn_config_filename"
 
 #=================================================
 # GENERIC FINALIZATION
@@ -103,33 +101,33 @@ ynh_use_logrotate
 #=================================================
 # INTEGRATE SERVICE IN YUNOHOST
 #=================================================
-ynh_script_progression --message="Integrating service in YunoHost..." --time --weight=1
-yunohost service add coturn --description="coturn, a STUN/TURN server" --log="/var/log/$app/$app.log"
-  --needs_exposed_ports "3478 5349"
-
-#=================================================
-# START SYSTEMD SERVICE
-#=================================================
-ynh_script_progression --message="Starting a systemd service..." --time --weight=1
-
-### `ynh_systemd_action` is used to start a systemd service for an app.
-### Only needed if you have configure a systemd service
-### If you're not using these lines:
-###		- Remove the section "STOP SYSTEMD SERVICE" and "START SYSTEMD SERVICE" in the backup script
-###		- As well as the section "START SYSTEMD SERVICE" in the restore script
-###		- As well as the section"STOP SYSTEMD SERVICE" and "START SYSTEMD SERVICE" in the upgrade script
-###		- And the section "STOP SYSTEMD SERVICE" and "START SYSTEMD SERVICE" in the change_url script
-
-# Start a systemd service
-ynh_systemd_action --service_name=$app --action="start" --log_path="/var/log/$app/$app.log"
+#ynh_script_progression --message="Integrating service in YunoHost..." --time --weight=1
+#yunohost service add coturn --description="coturn, a STUN/TURN server" --log="/var/log/$app/$app.log" \
+#  --needs_exposed_ports 3478 5349
+#
+##=================================================
+## START SYSTEMD SERVICE
+##=================================================
+#ynh_script_progression --message="Starting a systemd service..." --time --weight=1
+#
+#### `ynh_systemd_action` is used to start a systemd service for an app.
+#### Only needed if you have configure a systemd service
+#### If you're not using these lines:
+####		- Remove the section "STOP SYSTEMD SERVICE" and "START SYSTEMD SERVICE" in the backup script
+####		- As well as the section "START SYSTEMD SERVICE" in the restore script
+####		- As well as the section"STOP SYSTEMD SERVICE" and "START SYSTEMD SERVICE" in the upgrade script
+####		- And the section "STOP SYSTEMD SERVICE" and "START SYSTEMD SERVICE" in the change_url script
+#
+## Start a systemd service
+#ynh_systemd_action --service_name=$app --action="start" --log_path="/var/log/$app/$app.log"
 
 #=================================================
 # SETUP FAIL2BAN
 #=================================================
-ynh_script_progression --message="Configuring Fail2Ban..." --time --weight=1
-
-# Create a dedicated Fail2Ban config
-ynh_add_fail2ban_config --logpath="/var/log/nginx/${domain}-error.log" --failregex="Regex to match into the log for a failed login"
+#ynh_script_progression --message="Configuring Fail2Ban..." --time --weight=1
+#
+## Create a dedicated Fail2Ban config
+#ynh_add_fail2ban_config --logpath="/var/log/nginx/${domain}-error.log" --failregex="Regex to match into the log for a failed login"
 
 #=================================================
 # SETUP SSOWAT
