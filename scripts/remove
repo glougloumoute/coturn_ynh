@@ -17,7 +17,8 @@ ynh_script_progression --message="Loading installation settings..." --time --wei
 app=$YNH_APP_INSTANCE_NAME
 
 domain=$(ynh_app_setting_get --app=$app --key=domain)
-port=$(ynh_app_setting_get --app=$app --key=port)
+port_stun=$(ynh_app_setting_get --app=$app --key=port_stun)
+port_turns=$(ynh_app_setting_get --app=$app --key=port_turns)
 db_name=$(ynh_app_setting_get --app=$app --key=db_name)
 db_user=$db_name
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
@@ -63,10 +64,15 @@ ynh_remove_logrotate
 # CLOSE A PORT
 #=================================================
 
-if yunohost firewall list | grep -q "\- $port$"
+if yunohost firewall list | grep -q "\- $port_stun$"
 then
-	ynh_script_progression --message="Closing port $port..." --time --weight=1
-	ynh_exec_warn_less yunohost firewall disallow TCP $port
+	ynh_script_progression --message="Closing port $port_stun..." --time --weight=1
+	ynh_exec_warn_less yunohost firewall disallow Both $port_stun
+fi
+if yunohost firewall list | grep -q "\- $port_turns$"
+then
+	ynh_script_progression --message="Closing port $port_turns..." --time --weight=1
+	ynh_exec_warn_less yunohost firewall disallow TCP $port_turns
 fi
 
 #=================================================
